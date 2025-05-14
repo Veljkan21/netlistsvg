@@ -7,7 +7,7 @@ var ElkModel;
     ElkModel.wireNameLookup = {};
     ElkModel.dummyNum = 0;
     ElkModel.edgeIndex = 0;
-})(ElkModel = exports.ElkModel || (exports.ElkModel = {}));
+})(ElkModel || (exports.ElkModel = ElkModel = {}));
 function buildElkGraph(module) {
     var children = module.nodes.map(function (n) {
         return n.buildElkChild();

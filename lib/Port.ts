@@ -87,10 +87,10 @@ export class Port {
             if ((type === 'generic' || type === 'join') && dir === 'in') {
                 ret.labels = [{
                     id: nkey + '.' + this.key + '.label',
-                    text: this.key,
+                    text: this.key + (Array.isArray(this.value) && this.value.length > 1 ? ` [${this.value.length}]` : ""),
                     x: Number(templatePorts[0][2][1].x) - 10,
                     y: Number(templatePorts[0][2][1].y) - 6,
-                    width: (6 * this.key.length),
+                    width: (6 * (this.key.length+4)),
                     height: 11,
                 }];
             }
@@ -98,10 +98,10 @@ export class Port {
             if ((type === 'generic' || type === 'split') && dir === 'out') {
                 ret.labels = [{
                     id: nkey + '.' + this.key + '.label',
-                    text: this.key,
+                    text: this.key + (Array.isArray(this.value) && this.value.length > 1 ? ` [${this.value.length}]` : ""),
                     x: Number(templatePorts[0][2][1].x) - 10,
                     y: Number(templatePorts[0][2][1].y) - 6,
-                    width: (6 * this.key.length),
+                    width: (6 * (this.key.length+4)),
                     height: 11,
                 }];
             }
@@ -118,10 +118,10 @@ export class Port {
             if (type === 'generic') {
                 ret.labels = [{
                     id: nkey + '.' + this.key + '.label',
-                    text: this.key,
+                    text: this.key + (Array.isArray(this.value) && this.value.length > 1 ? ` [${this.value.length}]` : ""),
                     x: Number(templatePorts[0][2][1].x) - 10,
                     y: Number(templatePorts[0][2][1].y) - 6,
-                    width: (6 * this.key.length),
+                    width: (6 * (this.key.length+4)),
                     height: 11,
                 }];
             }

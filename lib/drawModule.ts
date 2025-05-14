@@ -114,7 +114,8 @@ export default function drawModule(g: ElkModel.Graph, module: FlatModule) {
         },
     });
     const elements: onml.Element[] = [styles, ...nodes, ...lines];
-    const ret: onml.Element = ['svg', svgAttrs, ...elements];
+    const ret: any = ['svg', svgAttrs, ...elements];
+
     return onml.s(ret);
 }
 

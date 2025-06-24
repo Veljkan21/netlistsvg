@@ -1,4 +1,13 @@
 "use strict";
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.removeDups = exports.addToDefaultDict = exports.arrayToBitstring = exports.FlatModule = void 0;
 var Skin_1 = require("./Skin");
@@ -127,57 +136,91 @@ function getIndicesString(bitstring, query, start) {
         return String(startIndex) + ':' + String(endIndex);
     }
 }
-// gather splits and joins
-function gather(inputs, // all inputs
-outputs, // all outputs
-toSolve, // an input array we are trying to solve
-start, // index of toSolve to start from
-end, // index of toSolve to end at
-splits, // container collecting the splits
-joins) {
-    // remove myself from outputs list if present
-    var outputIndex = outputs.indexOf(toSolve);
-    if (outputIndex !== -1) {
-        outputs.splice(outputIndex, 1);
-    }
-    // This toSolve is compconste
-    if (start >= toSolve.length || end - start < 2) {
-        return;
-    }
-    var query = toSolve.slice(start, end);
-    // are there are perfect matches?
-    if (arrayContains(query, inputs)) {
-        if (query !== toSolve) {
-            addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start));
+function gather(inputs, outputs, initialToSolve, start, end, splits, joins) {
+    var callStack = [{
+            toSolve: initialToSolve,
+            start: start,
+            end: end,
+            inputs: __spreadArray([], inputs, true),
+            outputs: __spreadArray([], outputs, true)
+        }];
+    while (callStack.length > 0) {
+        var ctx = callStack.pop();
+        var toSolve = ctx.toSolve, inputs_1 = ctx.inputs, outputs_1 = ctx.outputs;
+        var start_1 = ctx.start, end_1 = ctx.end;
+        // remove from outputs
+        var outputIndex = outputs_1.indexOf(toSolve);
+        if (outputIndex !== -1) {
+            outputs_1.splice(outputIndex, 1);
         }
-        gather(inputs, outputs, toSolve, end - 1, toSolve.length, splits, joins);
-        return;
-    }
-    var index = indexOfContains(query, inputs);
-    // are there any partial matches?
-    if (index !== -1) {
-        if (query !== toSolve) {
-            addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start));
+        if (start_1 >= toSolve.length || end_1 - start_1 < 2) {
+            continue;
         }
-        // found a split
-        addToDefaultDict(splits, inputs[index], getIndicesString(inputs[index], query, 0));
-        // we can match to this now
-        inputs.push(query);
-        gather(inputs, outputs, toSolve, end - 1, toSolve.length, splits, joins);
-        return;
-    }
-    // are there any output matches?
-    if (indexOfContains(query, outputs) !== -1) {
-        if (query !== toSolve) {
-            // add to join
-            addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start));
+        var query = toSolve.slice(start_1, end_1);
+        // perfect match
+        if (arrayContains(query, inputs_1)) {
+            if (query !== toSolve) {
+                addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start_1));
+            }
+            callStack.push({
+                toSolve: toSolve,
+                start: end_1 - 1,
+                end: toSolve.length,
+                inputs: inputs_1,
+                outputs: outputs_1
+            });
+            continue;
         }
-        // gather without outputs
-        gather(inputs, [], query, 0, query.length, splits, joins);
-        inputs.push(query);
-        return;
+        // partial match
+        var index = indexOfContains(query, inputs_1);
+        if (index !== -1) {
+            if (query !== toSolve) {
+                addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start_1));
+            }
+            addToDefaultDict(splits, inputs_1[index], getIndicesString(inputs_1[index], query, 0));
+            var newInputs = __spreadArray(__spreadArray([], inputs_1, true), [query], false);
+            callStack.push({
+                toSolve: toSolve,
+                start: end_1 - 1,
+                end: toSolve.length,
+                inputs: newInputs,
+                outputs: outputs_1
+            });
+            continue;
+        }
+        // match in outputs
+        if (indexOfContains(query, outputs_1) !== -1) {
+            if (query !== toSolve) {
+                addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start_1));
+            }
+            var newInputs = __spreadArray(__spreadArray([], inputs_1, true), [query], false);
+            callStack.push({
+                toSolve: query,
+                start: 0,
+                end: query.length,
+                inputs: inputs_1,
+                outputs: []
+            });
+            callStack.push({
+                toSolve: toSolve,
+                start: end_1 - 1,
+                end: toSolve.length,
+                inputs: newInputs,
+                outputs: outputs_1
+            });
+            continue;
+        }
+        var lastComma = query.slice(0, -1).lastIndexOf(',');
+        if (lastComma !== -1) {
+            callStack.push({
+                toSolve: toSolve,
+                start: start_1,
+                end: start_1 + lastComma + 1,
+                inputs: inputs_1,
+                outputs: outputs_1
+            });
+        }
     }
-    gather(inputs, outputs, toSolve, start, start + query.slice(0, -1).lastIndexOf(',') + 1, splits, joins);
 }
 function removeDups(inStrs) {
     var map = {};

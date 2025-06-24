@@ -170,61 +170,101 @@ function getIndicesString(bitstring: string,
     }
 }
 
-// gather splits and joins
-function gather(inputs: string[],  // all inputs
-                outputs: string[], // all outputs
-                toSolve: string, // an input array we are trying to solve
-                start: number,   // index of toSolve to start from
-                end: number,     // index of toSolve to end at
-                splits: SplitJoin,  // container collecting the splits
-                joins: SplitJoin): void {  // container collecting the joins
-    // remove myself from outputs list if present
-    const outputIndex: number = outputs.indexOf(toSolve);
-    if (outputIndex !== -1) {
-        outputs.splice(outputIndex, 1);
-    }
+function gather(inputs, outputs, initialToSolve, start, end, splits, joins) {
+    const callStack = [{
+        toSolve: initialToSolve,
+        start,
+        end,
+        inputs: [...inputs],
+        outputs: [...outputs]
+    }];
 
-    // This toSolve is compconste
-    if (start >= toSolve.length || end - start < 2) {
-        return;
-    }
+    while (callStack.length > 0) {
+        const ctx = callStack.pop();
+        const { toSolve, inputs, outputs } = ctx;
+        let { start, end } = ctx;
 
-    const query: string = toSolve.slice(start, end);
+        // remove from outputs
+        const outputIndex = outputs.indexOf(toSolve);
+        if (outputIndex !== -1) {
+            outputs.splice(outputIndex, 1);
+        }
 
-    // are there are perfect matches?
-    if (arrayContains(query, inputs)) {
-        if (query !== toSolve) {
-            addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start));
+        if (start >= toSolve.length || end - start < 2) {
+            continue;
         }
-        gather(inputs, outputs, toSolve, end - 1, toSolve.length, splits, joins);
-        return;
-    }
-    const index: number = indexOfContains(query, inputs);
-    // are there any partial matches?
-    if (index !== -1) {
-        if (query !== toSolve) {
-            addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start));
+
+        const query = toSolve.slice(start, end);
+
+        // perfect match
+        if (arrayContains(query, inputs)) {
+            if (query !== toSolve) {
+                addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start));
+            }
+            callStack.push({
+                toSolve,
+                start: end - 1,
+                end: toSolve.length,
+                inputs,
+                outputs
+            });
+            continue;
         }
-        // found a split
-        addToDefaultDict(splits, inputs[index], getIndicesString(inputs[index], query, 0));
-        // we can match to this now
-        inputs.push(query);
-        gather(inputs, outputs, toSolve, end - 1, toSolve.length, splits, joins);
-        return;
-    }
-    // are there any output matches?
-    if (indexOfContains(query, outputs) !== -1) {
-        if (query !== toSolve) {
-            // add to join
-            addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start));
+
+        // partial match
+        const index = indexOfContains(query, inputs);
+        if (index !== -1) {
+            if (query !== toSolve) {
+                addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start));
+            }
+            addToDefaultDict(splits, inputs[index], getIndicesString(inputs[index], query, 0));
+            const newInputs = [...inputs, query];
+            callStack.push({
+                toSolve,
+                start: end - 1,
+                end: toSolve.length,
+                inputs: newInputs,
+                outputs
+            });
+            continue;
         }
-        // gather without outputs
-        gather(inputs, [], query, 0, query.length, splits, joins);
-        inputs.push(query);
-        return;
+
+        // match in outputs
+        if (indexOfContains(query, outputs) !== -1) {
+            if (query !== toSolve) {
+                addToDefaultDict(joins, toSolve, getIndicesString(toSolve, query, start));
+            }
+            const newInputs = [...inputs, query];
+            callStack.push({
+                toSolve: query,
+                start: 0,
+                end: query.length,
+                inputs,
+                outputs: []
+            });
+            callStack.push({
+                toSolve,
+                start: end - 1,
+                end: toSolve.length,
+                inputs: newInputs,
+                outputs
+            });
+            continue;
+        }
+
+        const lastComma = query.slice(0, -1).lastIndexOf(',');
+        if (lastComma !== -1) {
+            callStack.push({
+                toSolve,
+                start,
+                end: start + lastComma + 1,
+                inputs,
+                outputs
+            });
+        }
     }
-    gather(inputs, outputs, toSolve, start, start + query.slice(0, -1).lastIndexOf(',') + 1, splits, joins);
 }
+
 
 export interface NameToPorts {
     [netName: string]: FlatPort[];

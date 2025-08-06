@@ -3,11 +3,21 @@
   xmlns:s="https://github.com/nturley/netlistsvg"
   width="800" height="500">
   <s:properties>
-    <s:layoutEngine
-      org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers="35"
-      org.eclipse.elk.spacing.nodeNode= "35"
-      org.eclipse.elk.layered.layering.strategy= "LONGEST_PATH"
-    />
+   <s:layoutEngine
+  elk.algorithm="layered"
+  org.eclipse.elk.direction="RIGHT"
+  org.eclipse.elk.portConstraints="FIXED_SIDE"
+  org.eclipse.elk.layered.layering.strategy="LONGEST_PATH"
+  org.eclipse.elk.layered.nodePlacement.strategy="SIMPLE"
+  org.eclipse.elk.layered.nodePlacement.bk.fixedAlignment="BALANCED"
+  org.eclipse.elk.layered.crossingMinimization.semiInteractive="false"
+  org.eclipse.elk.layered.mergeEdges="true"
+  org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers="30"
+  org.eclipse.elk.spacing.nodeNode="25"
+  org.eclipse.elk.layered.nodePlacement.favorStraightEdges="true"
+/>
+
+
     <s:low_priority_alias val="$dff" />
   </s:properties>
 <style>
@@ -27,6 +37,9 @@ line {
 }
 .nodelabel {
   text-anchor: middle;
+}
+.nodelabel2 {
+  text-anchor: start;
 }
 .inputPortLabel {
   text-anchor: end;
@@ -443,7 +456,7 @@ line {
   </g>
 
   <g s:type="inputExt" transform="translate(50,250)" s:width="30" s:height="20">
-    <text x="15" y="-4" class="nodelabel $cell_id" s:attribute="ref">input</text>
+    <text x="1" y="-4" class="nodelabel2 $cell_id" s:attribute="ref" text-anchor="start">input</text>
     <s:alias val="$_inputExt_"/>
     <path d="M0,0 L0,20 L15,20 L30,10 L15,0 Z" class="$cell_id"/>
     <g s:x="30" s:y="10" s:pid="Y"/>

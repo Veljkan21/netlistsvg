@@ -14,21 +14,17 @@ var Yosys;
         Direction["Output"] = "output";
     })(Direction = Yosys.Direction || (Yosys.Direction = {}));
     function getInputPortPids(cell) {
-        if (cell.port_directions) {
-            return Object.keys(cell.port_directions).filter(function (k) {
-                return cell.port_directions[k] === Direction.Input;
-            });
-        }
-        return [];
+        var keys = Object.keys(cell.port_directions || {});
+        var inputs = keys.filter(function (k) { return cell.port_directions[k] === Direction.Input; });
+        console.log("\uD83D\uDFE6 Found ".concat(inputs.length, " input ports in cell of type \"").concat(cell.type, "\""));
+        return inputs;
     }
     Yosys.getInputPortPids = getInputPortPids;
     function getOutputPortPids(cell) {
-        if (cell.port_directions) {
-            return Object.keys(cell.port_directions).filter(function (k) {
-                return cell.port_directions[k] === Direction.Output;
-            });
-        }
-        return [];
+        var keys = Object.keys(cell.port_directions || {});
+        var outputs = keys.filter(function (k) { return cell.port_directions[k] === Direction.Output; });
+        console.log("\uD83D\uDFE9 Found ".concat(outputs.length, " output ports in cell of type \"").concat(cell.type, "\""));
+        return outputs;
     }
     Yosys.getOutputPortPids = getOutputPortPids;
     var HideName;

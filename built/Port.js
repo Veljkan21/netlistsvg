@@ -29,19 +29,16 @@ var Port = /** @class */ (function () {
         var constNameCollector = '';
         var constNumCollector = [];
         var portSigs = this.value;
+        console.log("\uD83D\uDD0D [Port: ".concat(this.key, "] Tra\u017Eim konstante me\u0111u signalima: ").concat(portSigs));
         portSigs.forEach(function (portSig, portSigIndex) {
-            // is constant?
             if (portSig === '0' || portSig === '1') {
                 maxNum += 1;
                 constNameCollector += portSig;
-                // replace the constant with new signal num
                 portSigs[portSigIndex] = maxNum;
                 constNumCollector.push(maxNum);
-                // string of constants ended before end of p.value
             }
             else if (constNumCollector.length > 0) {
                 _this.assignConstant(constNameCollector, constNumCollector, portSigIndex, sigsByConstantName, constantCollector);
-                // reset name and num collectors
                 constNameCollector = '';
                 constNumCollector = [];
             }
@@ -54,6 +51,7 @@ var Port = /** @class */ (function () {
     Port.prototype.getGenericElkPort = function (index, templatePorts, dir) {
         var nkey = this.parentNode.Key;
         var type = this.parentNode.getTemplate()[1]['s:type'];
+        console.log("\uD83D\uDCCC [Port: ".concat(this.key, "] Elk port generisan (").concat(dir, "), index: ").concat(index, ", tip: ").concat(type));
         if (index === 0) {
             var ret = {
                 id: nkey + '.' + this.key,
@@ -108,20 +106,18 @@ var Port = /** @class */ (function () {
     };
     Port.prototype.assignConstant = function (nameCollector, constants, currIndex, signalsByConstantName, constantCollector) {
         var _this = this;
-        // we've been appending to nameCollector, so reverse to get const name
         var constName = nameCollector.split('').reverse().join('');
-        // if the constant has already been used
         if (signalsByConstantName.hasOwnProperty(constName)) {
+            console.log("\uD83D\uDD01 [Port: ".concat(this.key, "] Ve\u0107 vi\u0111en literal \"").concat(constName, "\", koristi stare signale."));
             var constSigs = signalsByConstantName[constName];
-            // go back and fix signal values
             var constLength_1 = constSigs.length;
             constSigs.forEach(function (constSig, constIndex) {
-                // i is where in port_signals we need to update
                 var i = currIndex - constLength_1 + constIndex;
                 _this.value[i] = constSig;
             });
         }
         else {
+            console.log("\uD83E\uDDEE [Port: ".concat(this.key, "] Novi literal \"").concat(constName, "\" dodeljen signalima: [").concat(constants, "]"));
             constantCollector.push(Cell_1.default.fromConstantInfo(constName, constants));
             signalsByConstantName[constName] = constants;
         }

@@ -2,6 +2,7 @@
 
 import ELK = require('elkjs');
 import onml = require('onml');
+import * as fs from 'fs'; // ✅ Dodato za pisanje fajlova
 
 import { FlatModule } from './FlatModule';
 import Yosys from './YosysModel';
@@ -17,11 +18,9 @@ function createFlatModule(skinData: string, yosysNetlist: Yosys.Netlist): FlatMo
     Skin.skin = onml.p(skinData);
     const layoutProps = Skin.getProperties();
     const flatModule = new FlatModule(yosysNetlist);
-    // this can be skipped if there are no 0's or 1's
     if (layoutProps.constants !== false) {
         flatModule.addConstants();
     }
-    // this can be skipped if there are no splits or joins
     if (layoutProps.splitsAndJoins !== false) {
         flatModule.addSplitsJoins();
     }
@@ -32,17 +31,25 @@ function createFlatModule(skinData: string, yosysNetlist: Yosys.Netlist): FlatMo
 export function dumpLayout(skinData: string, yosysNetlist: Yosys.Netlist, prelayout: boolean, done: ICallback) {
     const flatModule = createFlatModule(skinData, yosysNetlist);
     const kgraph: ElkModel.Graph = buildElkGraph(flatModule);
+
+    // ✅ Sačuvaj ulazni graf pre layout-a
+    fs.writeFileSync('elk-input-graph.json', JSON.stringify(kgraph, null, 2), 'utf-8');
+
     if (prelayout) {
         done(null, JSON.stringify(kgraph, null, 2));
         return;
     }
+
     const layoutProps = Skin.getProperties();
-    const promise = elk.layout(kgraph, { layoutOptions: layoutProps.layoutEngine });
-    promise.then((graph: ElkModel.Graph) => {
-        done(null, JSON.stringify(graph, null, 2));
-    }).catch((reason) => {
-        throw Error(reason);
-    });
+    elk.layout(kgraph, { layoutOptions: layoutProps.layoutEngine })
+        .then((graph: ElkModel.Graph) => {
+            // ✅ Sačuvaj ELK layout rezultat
+            fs.writeFileSync('elk-output-layout.json', JSON.stringify(graph, null, 2), 'utf-8');
+            done(null, JSON.stringify(graph, null, 2));
+        })
+        .catch((reason) => {
+            throw Error(reason);
+        });
 }
 
 export function render(skinData: string, yosysNetlist: Yosys.Netlist, done?: ICallback, elkData?: ElkModel.Graph) {
@@ -50,22 +57,36 @@ export function render(skinData: string, yosysNetlist: Yosys.Netlist, done?: ICa
     const kgraph: ElkModel.Graph = buildElkGraph(flatModule);
     const layoutProps = Skin.getProperties();
 
+    // ✅ Snimi ulazni graf
+    fs.writeFileSync('elk-input-graph.json', JSON.stringify(kgraph, null, 2), 'utf-8');
+
     let promise;
-    // if we already have a layout then use it
+
     if (elkData) {
         promise = new Promise<void>((resolve) => {
             drawModule(elkData, flatModule);
             resolve();
         });
     } else {
-        // otherwise use ELK to generate the layout
+        console.log('Pozivam elk.layout...');
+        const t0 = Date.now();
+
         promise = elk.layout(kgraph, { layoutOptions: layoutProps.layoutEngine })
-            .then((g) => drawModule(g, flatModule))
-            // tslint:disable-next-line:no-console
-            .catch((e) => { console.error(e); });
+            .then((g) => {
+                const t1 = Date.now();
+                console.log(`elk.layout završen za ${(t1 - t0) / 1000}s`);
+
+                // ✅ Sačuvaj izlazni graf
+                fs.writeFileSync('elk-output-layout.json', JSON.stringify(g, null, 2), 'utf-8');
+
+                console.log('drawModule: Renderujem čvorove...');
+                return drawModule(g, flatModule);
+            })
+            .catch((e) => {
+                console.error('Greška u elk.layout:', e);
+            });
     }
 
-    // support legacy callback style
     if (typeof done === 'function') {
         promise.then((output: string) => {
             done(null, output);
@@ -74,5 +95,6 @@ export function render(skinData: string, yosysNetlist: Yosys.Netlist, done?: ICa
             throw Error(reason);
         });
     }
+
     return promise;
 }

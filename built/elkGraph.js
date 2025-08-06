@@ -1,6 +1,18 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildElkGraph = exports.ElkModel = void 0;
+exports.ElkModel = void 0;
+exports.buildElkGraph = buildElkGraph;
 var _ = require("lodash");
 var ElkModel;
 (function (ElkModel) {
@@ -9,36 +21,37 @@ var ElkModel;
     ElkModel.edgeIndex = 0;
 })(ElkModel || (exports.ElkModel = ElkModel = {}));
 function buildElkGraph(module) {
+    console.log("\uD83E\uDDF1 buildElkGraph: Startujem za modul \"".concat(module.moduleName, "\""));
+    console.log("\uD83D\uDCE6 buildElkGraph: Ukupno \u010Dvorova: ".concat(module.nodes.length));
     var children = module.nodes.map(function (n) {
         return n.buildElkChild();
     });
     ElkModel.edgeIndex = 0;
     ElkModel.dummyNum = 0;
-    var edges = _.flatMap(module.wires, function (w) {
+    console.log("\uD83D\uDD17 buildElkGraph: Po\u010Dinjem obradu \u017Eica... (".concat(module.wires.length, " ukupno)"));
+    var edges = _.flatMap(module.wires, function (w, i) {
+        if (i % 1000 === 0) {
+            console.log("  \uD83E\uDDEE Obrada \u017Eice #".concat(i, " (").concat(w.netName, ")"));
+        }
         var numWires = w.netName.split(',').length - 2;
-        // at least one driver and at least one rider and no laterals
         if (w.drivers.length > 0 && w.riders.length > 0 && w.laterals.length === 0) {
             var ret = [];
             route(w.drivers, w.riders, ret, numWires);
             return ret;
-            // at least one driver or rider and at least one lateral
         }
         else if (w.drivers.concat(w.riders).length > 0 && w.laterals.length > 0) {
             var ret = [];
             route(w.drivers, w.laterals, ret, numWires);
             route(w.laterals, w.riders, ret, numWires);
             return ret;
-            // at least two drivers and no riders
         }
         else if (w.riders.length === 0 && w.drivers.length > 1) {
-            // create a dummy node and add it to children
             var dummyId_1 = addDummy(children);
             ElkModel.dummyNum += 1;
-            var dummyEdges = w.drivers.map(function (driver) {
+            return w.drivers.map(function (driver) {
+                var id = 'e' + ElkModel.edgeIndex++;
                 var sourceParentKey = driver.parentNode.Key;
-                var id = 'e' + String(ElkModel.edgeIndex);
-                ElkModel.edgeIndex += 1;
-                var d = {
+                var edge = {
                     id: id,
                     source: sourceParentKey,
                     sourcePort: sourceParentKey + '.' + driver.key,
@@ -46,38 +59,32 @@ function buildElkGraph(module) {
                     targetPort: dummyId_1 + '.p',
                 };
                 ElkModel.wireNameLookup[id] = driver.wire.netName;
-                return d;
+                return edge;
             });
-            return dummyEdges;
-            // at least one rider and no drivers
         }
         else if (w.riders.length > 1 && w.drivers.length === 0) {
-            // create a dummy node and add it to children
             var dummyId_2 = addDummy(children);
             ElkModel.dummyNum += 1;
-            var dummyEdges = w.riders.map(function (rider) {
-                var sourceParentKey = rider.parentNode.Key;
-                var id = 'e' + String(ElkModel.edgeIndex);
-                ElkModel.edgeIndex += 1;
+            return w.riders.map(function (rider) {
+                var id = 'e' + ElkModel.edgeIndex++;
+                var targetParentKey = rider.parentNode.Key;
                 var edge = {
                     id: id,
                     source: dummyId_2,
                     sourcePort: dummyId_2 + '.p',
-                    target: sourceParentKey,
-                    targetPort: sourceParentKey + '.' + rider.key,
+                    target: targetParentKey,
+                    targetPort: targetParentKey + '.' + rider.key,
                 };
                 ElkModel.wireNameLookup[id] = rider.wire.netName;
                 return edge;
             });
-            return dummyEdges;
         }
         else if (w.laterals.length > 1) {
             var source_1 = w.laterals[0];
             var sourceParentKey_1 = source_1.parentNode.Key;
-            var lateralEdges = w.laterals.slice(1).map(function (lateral) {
+            return w.laterals.slice(1).map(function (lateral) {
+                var id = 'e' + ElkModel.edgeIndex++;
                 var lateralParentKey = lateral.parentNode.Key;
-                var id = 'e' + String(ElkModel.edgeIndex);
-                ElkModel.edgeIndex += 1;
                 var edge = {
                     id: id,
                     source: sourceParentKey_1,
@@ -88,18 +95,16 @@ function buildElkGraph(module) {
                 ElkModel.wireNameLookup[id] = lateral.wire.netName;
                 return edge;
             });
-            return lateralEdges;
         }
-        // for only one driver or only one rider, don't create any edges
         return [];
     });
+    console.log("\u2705 buildElkGraph: Gotovo. \u010Cvorova: ".concat(children.length, ", Veza: ").concat(edges.length));
     return {
         id: module.moduleName,
         children: children,
         edges: edges,
     };
 }
-exports.buildElkGraph = buildElkGraph;
 function addDummy(children) {
     var dummyId = '$d_' + String(ElkModel.dummyNum);
     var child = {
@@ -117,7 +122,7 @@ function addDummy(children) {
     return dummyId;
 }
 function route(sourcePorts, targetPorts, edges, numWires) {
-    var newEdges = (_.flatMap(sourcePorts, function (sourcePort) {
+    var newEdges = _.flatMap(sourcePorts, function (sourcePort) {
         var sourceParentKey = sourcePort.parentNode.key;
         var sourceKey = sourceParentKey + '.' + sourcePort.key;
         var edgeLabel;
@@ -137,24 +142,19 @@ function route(sourcePorts, targetPorts, edges, numWires) {
         return targetPorts.map(function (targetPort) {
             var targetParentKey = targetPort.parentNode.key;
             var targetKey = targetParentKey + '.' + targetPort.key;
-            var id = 'e' + ElkModel.edgeIndex;
+            var id = 'e' + ElkModel.edgeIndex++;
             var edge = {
                 id: id,
                 labels: edgeLabel,
                 sources: [sourceKey],
                 targets: [targetKey],
+                layoutOptions: __assign({ 'org.eclipse.elk.edge.thickness': (numWires > 1 ? 2 : 1) }, (sourcePort.parentNode.type !== '$dff' && {
+                    'org.eclipse.elk.layered.priority.direction': 10,
+                })),
             };
             ElkModel.wireNameLookup[id] = targetPort.wire.netName;
-            if (sourcePort.parentNode.type !== '$dff') {
-                edge.layoutOptions = { 'org.eclipse.elk.layered.priority.direction': 10,
-                    'org.eclipse.elk.edge.thickness': (numWires > 1 ? 2 : 1) };
-            }
-            else {
-                edge.layoutOptions = { 'org.eclipse.elk.edge.thickness': (numWires > 1 ? 2 : 1) };
-            }
-            ElkModel.edgeIndex += 1;
             return edge;
         });
-    }));
+    });
     edges.push.apply(edges, newEdges);
 }

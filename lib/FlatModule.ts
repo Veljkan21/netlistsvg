@@ -23,92 +23,103 @@ export class FlatModule {
     public wires: Wire[];
 
     constructor(netlist: Yosys.Netlist) {
+        console.log("🧩 [FlatModule] Konstruktor: traženje top modula...");
         this.moduleName = null;
         _.forEach(netlist.modules, (mod: Yosys.Module, name: string) => {
             if (mod.attributes && Number(mod.attributes.top) === 1) {
                 this.moduleName = name;
             }
         });
-        // Otherwise default the first one in the file...
+
         if (this.moduleName == null) {
             this.moduleName = Object.keys(netlist.modules)[0];
         }
+
         const top = netlist.modules[this.moduleName];
+        console.log(`🔝 [FlatModule] Top modul: ${this.moduleName}`);
+
         const ports = _.map(top.ports, Cell.fromPort);
         const cells = _.map(top.cells, (c, key) => Cell.fromYosysCell(c, key));
         this.nodes = cells.concat(ports);
-        // populated by createWires
+        console.log(`📦 [FlatModule] Ukupno čvorova: ${this.nodes.length}`);
+
         this.wires = [];
     }
 
-    // converts input ports with constant assignments to constant nodes
     public addConstants(): void {
-        // find the maximum signal number
+        console.log("➕ [FlatModule] Dodavanje konstantnih čvorova...");
         let maxNum: number = this.nodes.reduce(((acc, v) => v.maxOutVal(acc)), -1);
 
-        // add constants to nodes
         const signalsByConstantName: SigsByConstName = {};
         const cells: Cell[] = [];
         this.nodes.forEach((n) => {
             maxNum = n.findConstants(signalsByConstantName, maxNum, cells);
         });
         this.nodes = this.nodes.concat(cells);
+        console.log(`🔢 [FlatModule] Dodato konstanti: ${cells.length}`);
     }
 
-    // solves for minimal bus splits and joins and adds them to module
     public addSplitsJoins(): void {
+        console.log("🔀 [FlatModule] Dodavanje splits/joins...");
         const allInputs = _.flatMap(this.nodes, (n) => n.inputPortVals());
         const allOutputs = _.flatMap(this.nodes, (n) => n.outputPortVals());
 
         const allInputsCopy = allInputs.slice();
         const splits: SplitJoin = {};
         const joins: SplitJoin = {};
+
         allInputs.forEach((input) => {
-            gather(
-                allOutputs,
-                allInputsCopy,
-                input,
-                0,
-                input.length,
-                splits,
-                joins);
+            gather(allOutputs, allInputsCopy, input, 0, input.length, splits, joins);
         });
 
-        this.nodes = this.nodes.concat(_.map(joins, (joinOutput, joinInputs) => {
+        const joinCells = _.map(joins, (joinOutput, joinInputs) => {
             return Cell.fromJoinInfo(joinInputs, joinOutput);
-        })).concat(_.map(splits, (splitOutputs, splitInput) => {
+        });
+
+        const splitCells = _.map(splits, (splitOutputs, splitInput) => {
             return Cell.fromSplitInfo(splitInput, splitOutputs);
-        }));
+        });
+
+        this.nodes = this.nodes.concat(joinCells).concat(splitCells);
+        console.log(`🔗 [FlatModule] Splits: ${Object.keys(splits).length}, Joins: ${Object.keys(joins).length}`);
     }
 
-    // search through all the ports to find all of the wires
     public createWires() {
+        console.log("📡 [FlatModule] Kreiranje žica...");
         const layoutProps = Skin.getProperties();
         const ridersByNet: NameToPorts = {};
         const driversByNet: NameToPorts = {};
         const lateralsByNet: NameToPorts = {};
+
         this.nodes.forEach((n) => {
             n.collectPortsByDirection(
                 ridersByNet,
                 driversByNet,
                 lateralsByNet,
-                layoutProps.genericsLaterals as boolean);
+                layoutProps.genericsLaterals as boolean
+            );
         });
-        // list of unique nets
-        const nets = removeDups(_.keys(ridersByNet).concat(_.keys(driversByNet)).concat(_.keys(lateralsByNet)));
+
+        const nets = removeDups(
+            _.keys(ridersByNet).concat(_.keys(driversByNet)).concat(_.keys(lateralsByNet))
+        );
+
         const wires: Wire[] = nets.map((net) => {
             const drivers: FlatPort[] = driversByNet[net] || [];
             const riders: FlatPort[] = ridersByNet[net] || [];
             const laterals: FlatPort[] = lateralsByNet[net] || [];
-            const wire: Wire = { netName: net, drivers, riders, laterals};
+            const wire: Wire = { netName: net, drivers, riders, laterals };
             drivers.concat(riders).concat(laterals).forEach((port) => {
                 port.wire = wire;
             });
             return wire;
         });
+
         this.wires = wires;
+        console.log(`📬 [FlatModule] Kreirano žica: ${this.wires.length}`);
     }
 }
+
 
 export interface SigsByConstName {
     [constantName: string]: number[];

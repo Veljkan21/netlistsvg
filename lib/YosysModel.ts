@@ -1,4 +1,3 @@
-
 namespace Yosys {
     enum ConstantVal {
         Zero = '0',
@@ -17,7 +16,7 @@ namespace Yosys {
     }
 
     interface ModuleAttributes {
-        top?: number|string;
+        top?: number | string;
         [attrName: string]: any;
     }
 
@@ -62,21 +61,17 @@ namespace Yosys {
     }
 
     export function getInputPortPids(cell: Cell): string[] {
-        if (cell.port_directions) {
-            return Object.keys(cell.port_directions).filter((k) => {
-                return cell.port_directions[k] === Direction.Input;
-            });
-        }
-        return [];
+        const keys = Object.keys(cell.port_directions || {});
+        const inputs = keys.filter((k) => cell.port_directions[k] === Direction.Input);
+        console.log(`🟦 Found ${inputs.length} input ports in cell of type "${cell.type}"`);
+        return inputs;
     }
 
     export function getOutputPortPids(cell: Cell): string[] {
-        if (cell.port_directions) {
-            return Object.keys(cell.port_directions).filter((k) => {
-                return cell.port_directions[k] === Direction.Output;
-            });
-        }
-        return [];
+        const keys = Object.keys(cell.port_directions || {});
+        const outputs = keys.filter((k) => cell.port_directions[k] === Direction.Output);
+        console.log(`🟩 Found ${outputs.length} output ports in cell of type "${cell.type}"`);
+        return outputs;
     }
 
     interface CellMap {

@@ -9,44 +9,47 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeDups = exports.addToDefaultDict = exports.arrayToBitstring = exports.FlatModule = void 0;
+exports.FlatModule = void 0;
+exports.arrayToBitstring = arrayToBitstring;
+exports.addToDefaultDict = addToDefaultDict;
+exports.removeDups = removeDups;
 var Skin_1 = require("./Skin");
 var Cell_1 = require("./Cell");
 var _ = require("lodash");
 var FlatModule = /** @class */ (function () {
     function FlatModule(netlist) {
         var _this = this;
+        console.log("🧩 [FlatModule] Konstruktor: traženje top modula...");
         this.moduleName = null;
         _.forEach(netlist.modules, function (mod, name) {
             if (mod.attributes && Number(mod.attributes.top) === 1) {
                 _this.moduleName = name;
             }
         });
-        // Otherwise default the first one in the file...
         if (this.moduleName == null) {
             this.moduleName = Object.keys(netlist.modules)[0];
         }
         var top = netlist.modules[this.moduleName];
+        console.log("\uD83D\uDD1D [FlatModule] Top modul: ".concat(this.moduleName));
         var ports = _.map(top.ports, Cell_1.default.fromPort);
         var cells = _.map(top.cells, function (c, key) { return Cell_1.default.fromYosysCell(c, key); });
         this.nodes = cells.concat(ports);
-        // populated by createWires
+        console.log("\uD83D\uDCE6 [FlatModule] Ukupno \u010Dvorova: ".concat(this.nodes.length));
         this.wires = [];
     }
-    // converts input ports with constant assignments to constant nodes
     FlatModule.prototype.addConstants = function () {
-        // find the maximum signal number
+        console.log("➕ [FlatModule] Dodavanje konstantnih čvorova...");
         var maxNum = this.nodes.reduce((function (acc, v) { return v.maxOutVal(acc); }), -1);
-        // add constants to nodes
         var signalsByConstantName = {};
         var cells = [];
         this.nodes.forEach(function (n) {
             maxNum = n.findConstants(signalsByConstantName, maxNum, cells);
         });
         this.nodes = this.nodes.concat(cells);
+        console.log("\uD83D\uDD22 [FlatModule] Dodato konstanti: ".concat(cells.length));
     };
-    // solves for minimal bus splits and joins and adds them to module
     FlatModule.prototype.addSplitsJoins = function () {
+        console.log("🔀 [FlatModule] Dodavanje splits/joins...");
         var allInputs = _.flatMap(this.nodes, function (n) { return n.inputPortVals(); });
         var allOutputs = _.flatMap(this.nodes, function (n) { return n.outputPortVals(); });
         var allInputsCopy = allInputs.slice();
@@ -55,14 +58,17 @@ var FlatModule = /** @class */ (function () {
         allInputs.forEach(function (input) {
             gather(allOutputs, allInputsCopy, input, 0, input.length, splits, joins);
         });
-        this.nodes = this.nodes.concat(_.map(joins, function (joinOutput, joinInputs) {
+        var joinCells = _.map(joins, function (joinOutput, joinInputs) {
             return Cell_1.default.fromJoinInfo(joinInputs, joinOutput);
-        })).concat(_.map(splits, function (splitOutputs, splitInput) {
+        });
+        var splitCells = _.map(splits, function (splitOutputs, splitInput) {
             return Cell_1.default.fromSplitInfo(splitInput, splitOutputs);
-        }));
+        });
+        this.nodes = this.nodes.concat(joinCells).concat(splitCells);
+        console.log("\uD83D\uDD17 [FlatModule] Splits: ".concat(Object.keys(splits).length, ", Joins: ").concat(Object.keys(joins).length));
     };
-    // search through all the ports to find all of the wires
     FlatModule.prototype.createWires = function () {
+        console.log("📡 [FlatModule] Kreiranje žica...");
         var layoutProps = Skin_1.default.getProperties();
         var ridersByNet = {};
         var driversByNet = {};
@@ -70,7 +76,6 @@ var FlatModule = /** @class */ (function () {
         this.nodes.forEach(function (n) {
             n.collectPortsByDirection(ridersByNet, driversByNet, lateralsByNet, layoutProps.genericsLaterals);
         });
-        // list of unique nets
         var nets = removeDups(_.keys(ridersByNet).concat(_.keys(driversByNet)).concat(_.keys(lateralsByNet)));
         var wires = nets.map(function (net) {
             var drivers = driversByNet[net] || [];
@@ -83,6 +88,7 @@ var FlatModule = /** @class */ (function () {
             return wire;
         });
         this.wires = wires;
+        console.log("\uD83D\uDCEC [FlatModule] Kreirano \u017Eica: ".concat(this.wires.length));
     };
     return FlatModule;
 }());
@@ -102,7 +108,6 @@ function arrayToBitstring(bitArray) {
     });
     return ',' + ret + ',';
 }
-exports.arrayToBitstring = arrayToBitstring;
 // returns whether needle is a substring of haystack
 function arrayContains(needle, haystack) {
     return (haystack.indexOf(needle) > -1);
@@ -122,7 +127,6 @@ function addToDefaultDict(dict, key, value) {
         dict[key].push(value);
     }
 }
-exports.addToDefaultDict = addToDefaultDict;
 // string (for labels), that represents an index
 // or range of indices.
 function getIndicesString(bitstring, query, start) {
@@ -229,4 +233,3 @@ function removeDups(inStrs) {
     });
     return _.keys(map);
 }
-exports.removeDups = removeDups;

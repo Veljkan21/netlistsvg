@@ -196,6 +196,9 @@ export default class Cell {
         const layoutAttrs = { 'org.eclipse.elk.portConstraints': 'FIXED_POS' };
         let fixedPosX = null;
         let fixedPosY = null;
+        
+
+        console.log(fixedPosX);
         for (const attr in this.attributes) {
             if (attr.startsWith('org.eclipse.elk')) {
                 if (attr === 'org.eclipse.elk.x') {
@@ -208,6 +211,12 @@ export default class Cell {
                 }
                 layoutAttrs[attr] = this.attributes[attr];
             }
+        }
+        // Ako je input eksterni čvor, fiksiraj x = 15
+        if (type === 'inputExt') {
+            fixedPosX = 15;
+            layoutAttrs['org.eclipse.elk.position'] = 'FIXED';
+            layoutAttrs['org.eclipse.elk.portConstraints'] = 'FIXED_POS';
         }
         if (type === 'join' ||
             type === 'split' ||
@@ -254,7 +263,9 @@ export default class Cell {
             labels: [],
         };
         if (fixedPosX) {
+            console.log("FINAL fixedPosX:", fixedPosX);
             ret.x = fixedPosX;
+
         }
         if (fixedPosY) {
             ret.y = fixedPosY;

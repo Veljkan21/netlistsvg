@@ -9,7 +9,8 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeDummyEdges = void 0;
+exports.default = drawModule;
+exports.removeDummyEdges = removeDummyEdges;
 var elkGraph_1 = require("./elkGraph");
 var Skin_1 = require("./Skin");
 var _ = require("lodash");
@@ -21,17 +22,28 @@ var WireDirection;
     WireDirection[WireDirection["Left"] = 2] = "Left";
     WireDirection[WireDirection["Right"] = 3] = "Right";
 })(WireDirection || (WireDirection = {}));
-function drawModule(g, module) {
+function drawModule(g, module,bit =0) {
+    console.log('🎨 drawModule: Renderujem čvorove...');
     var nodes = module.nodes.map(function (n) {
         var kchild = _.find(g.children, function (c) { return c.id === n.Key; });
         return n.render(kchild);
     });
+    console.log('🧹 drawModule: Uklanjam dummy ivice...');
     removeDummyEdges(g);
+    console.log('🔌 drawModule: Renderujem žice...');
     var lines = _.flatMap(g.edges, function (e) {
         var netId = elkGraph_1.ElkModel.wireNameLookup[e.id];
         var numWires = netId.split(',').length - 2;
-        var lineStyle = 'stroke-width: ' + (numWires > 1 ? 2 : 1);
+        var isBits = Array.isArray(bit)
+        ? bit.some(b => new RegExp(`\\b${b}\\b`).test(netId))
+        : new RegExp(`\\b${bit}\\b`).test(netId);
+
+        console.log(bit);
+
+
+        var lineStyle = "stroke: ".concat(isBits ? 'blue' : 'black', "; stroke-width: ").concat(numWires > 1 ? 2 : 1);
         var netName = 'net_' + netId.slice(1, netId.length - 1) + ' width_' + numWires;
+        //console.log(netName);
         return _.flatMap(e.sections, function (s) {
             var startPoint = s.startPoint;
             s.bendPoints = s.bendPoints || [];
@@ -53,7 +65,7 @@ function drawModule(g, module) {
                             cx: j.x,
                             cy: j.y,
                             r: (numWires > 1 ? 3 : 2),
-                            style: 'fill:#000',
+                            style: 'fill: black',
                             class: netName,
                         }];
                 });
@@ -70,7 +82,8 @@ function drawModule(g, module) {
             return bends.concat(line);
         });
     });
-    var labels;
+    console.log('🏷️ drawModule: Dodajem label-e...');
+    var labels = [];
     for (var index in g.edges) {
         if (g.edges.hasOwnProperty(index)) {
             var e = g.edges[index];
@@ -92,27 +105,23 @@ function drawModule(g, module) {
                             class: netName,
                             style: 'fill: white; stroke: none',
                         },
-                    ], ['text',
+                    ],['text',
                         {
                             x: e.labels[0].x,
-                            y: e.labels[0].y + 7,
+                            y: e.labels[0].y+7 ,
                             class: netName,
                         },
                         '/' + e.labels[0].text + '/',
                     ],
                 ];
-                if (labels !== undefined) {
-                    labels = labels.concat(label);
-                }
-                else {
-                    labels = label;
-                }
+                labels = labels.concat(label);
             }
         }
     }
-    if (labels !== undefined && labels.length > 0) {
+    if (labels.length > 0) {
         lines = lines.concat(labels);
     }
+    console.log('🧩 drawModule: Finalizujem SVG...');
     var svgAttrs = Skin_1.default.skin[1];
     svgAttrs.width = g.width.toString();
     svgAttrs.height = g.height.toString();
@@ -126,9 +135,9 @@ function drawModule(g, module) {
     });
     var elements = __spreadArray(__spreadArray([styles], nodes, true), lines, true);
     var ret = __spreadArray(['svg', svgAttrs], elements, true);
+    console.log('✅ drawModule: SVG render završen.');
     return onml.s(ret);
 }
-exports.default = drawModule;
 function which_dir(start, end) {
     if (end.x === start.x && end.y === start.y) {
         throw new Error('start and end are the same');
@@ -252,4 +261,3 @@ function removeDummyEdges(g) {
             break;
     }
 }
-exports.removeDummyEdges = removeDummyEdges;

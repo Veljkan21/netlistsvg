@@ -12,16 +12,25 @@ enum WireDirection {
 }
 
 export default function drawModule(g: ElkModel.Graph, module: FlatModule) {
+    console.log('🎨 drawModule: Renderujem čvorove...');
     const nodes: onml.Element[] = module.nodes.map((n: Cell) => {
         const kchild: ElkModel.Cell = _.find(g.children, (c) => c.id === n.Key);
         return n.render(kchild);
     });
+
+    console.log('🧹 drawModule: Uklanjam dummy ivice...');
     removeDummyEdges(g);
+
+    console.log('🔌 drawModule: Renderujem žice...');
     let lines: onml.Element[] = _.flatMap(g.edges, (e: ElkModel.Edge) => {
         const netId = ElkModel.wireNameLookup[e.id];
         const numWires = netId.split(',').length - 2;
-        const lineStyle = 'stroke-width: ' + (numWires > 1 ? 2 : 1);
+        const isClk = /12/.test(netId);
+
+        const lineStyle = `stroke: ${isClk ? 'blue' : 'black'}; stroke-width: ${numWires > 1 ? 2 : 1}`;
+
         const netName = 'net_' + netId.slice(1, netId.length - 1) + ' width_' + numWires;
+        console.log(netName);
         return _.flatMap(e.sections, (s: ElkModel.Section) => {
             let startPoint = s.startPoint;
             s.bendPoints = s.bendPoints || [];
@@ -59,7 +68,9 @@ export default function drawModule(g: ElkModel.Graph, module: FlatModule) {
             return bends.concat(line);
         });
     });
-    let labels: any[];
+
+    console.log('🏷️ drawModule: Dodajem label-e...');
+    let labels: any[] = [];
     for (const index in g.edges) {
         if (g.edges.hasOwnProperty(index)) {
             const e = g.edges[index];
@@ -90,17 +101,15 @@ export default function drawModule(g: ElkModel.Graph, module: FlatModule) {
                             '/' + e.labels[0].text + '/',
                         ],
                     ];
-                if (labels !== undefined) {
-                    labels = labels.concat(label);
-                } else {
-                    labels = label;
-                }
+                labels = labels.concat(label);
             }
         }
     }
-    if (labels !== undefined && labels.length > 0) {
+    if (labels.length > 0) {
         lines = lines.concat(labels);
     }
+
+    console.log('🧩 drawModule: Finalizujem SVG...');
     const svgAttrs: onml.Attributes = Skin.skin[1];
     svgAttrs.width = g.width.toString();
     svgAttrs.height = g.height.toString();
@@ -113,11 +122,14 @@ export default function drawModule(g: ElkModel.Graph, module: FlatModule) {
             }
         },
     });
+
     const elements: onml.Element[] = [styles, ...nodes, ...lines];
     const ret: any = ['svg', svgAttrs, ...elements];
 
+    console.log('✅ drawModule: SVG render završen.');
     return onml.s(ret);
 }
+
 
 function which_dir(start: ElkModel.WirePoint, end: ElkModel.WirePoint): WireDirection {
     if (end.x === start.x && end.y === start.y) {

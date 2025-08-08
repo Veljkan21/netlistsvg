@@ -30,11 +30,11 @@ var FlatModule = /** @class */ (function () {
             this.moduleName = Object.keys(netlist.modules)[0];
         }
         var top = netlist.modules[this.moduleName];
-        console.log("\uD83D\uDD1D [FlatModule] Top modul: ".concat(this.moduleName));
+        //console.log("\uD83D\uDD1D [FlatModule] Top modul: ".concat(this.moduleName));
         var ports = _.map(top.ports, Cell_1.default.fromPort);
         var cells = _.map(top.cells, function (c, key) { return Cell_1.default.fromYosysCell(c, key); });
         this.nodes = cells.concat(ports);
-        console.log("\uD83D\uDCE6 [FlatModule] Ukupno \u010Dvorova: ".concat(this.nodes.length));
+        //console.log("\uD83D\uDCE6 [FlatModule] Ukupno \u010Dvorova: ".concat(this.nodes.length));
         this.wires = [];
     }
     FlatModule.prototype.addConstants = function () {
@@ -46,7 +46,7 @@ var FlatModule = /** @class */ (function () {
             maxNum = n.findConstants(signalsByConstantName, maxNum, cells);
         });
         this.nodes = this.nodes.concat(cells);
-        console.log("\uD83D\uDD22 [FlatModule] Dodato konstanti: ".concat(cells.length));
+        //console.log("\uD83D\uDD22 [FlatModule] Dodato konstanti: ".concat(cells.length));
     };
     FlatModule.prototype.addSplitsJoins = function () {
         console.log("🔀 [FlatModule] Dodavanje splits/joins...");
@@ -65,7 +65,7 @@ var FlatModule = /** @class */ (function () {
             return Cell_1.default.fromSplitInfo(splitInput, splitOutputs);
         });
         this.nodes = this.nodes.concat(joinCells).concat(splitCells);
-        console.log("\uD83D\uDD17 [FlatModule] Splits: ".concat(Object.keys(splits).length, ", Joins: ").concat(Object.keys(joins).length));
+        //console.log("\uD83D\uDD17 [FlatModule] Splits: ".concat(Object.keys(splits).length, ", Joins: ").concat(Object.keys(joins).length));
     };
     FlatModule.prototype.createWires = function () {
         console.log("📡 [FlatModule] Kreiranje žica...");
@@ -88,7 +88,7 @@ var FlatModule = /** @class */ (function () {
             return wire;
         });
         this.wires = wires;
-        console.log("\uD83D\uDCEC [FlatModule] Kreirano \u017Eica: ".concat(this.wires.length));
+        //console.log("\uD83D\uDCEC [FlatModule] Kreirano \u017Eica: ".concat(this.wires.length));
     };
     return FlatModule;
 }());

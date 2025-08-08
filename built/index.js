@@ -69,7 +69,7 @@ function dumpLayout(skinData, yosysNetlist, prelayout, done) {
     });
 }
 
-function render(skinData, yosysNetlist, done, elkData, bit) {
+function render(skinData, yosysNetlist, done, elkData, bit, bit_in) {
     //fs.writeFileSync('debug-netlist.json', JSON.stringify(yosysNetlist, null, 2), 'utf-8');
 
 
@@ -83,7 +83,7 @@ function render(skinData, yosysNetlist, done, elkData, bit) {
     var promise;
     if (elkData) {
         promise = new Promise(function (resolve) {
-            (0, drawModule_1.default)(elkData, flatModule, bit);
+            (0, drawModule_1.default)(elkData, flatModule, bit,bit_in);
             resolve();
         });
     }
@@ -97,7 +97,7 @@ function render(skinData, yosysNetlist, done, elkData, bit) {
             // ✅ Sačuvaj izlazni graf
             fs.writeFileSync('elk-output-layout.json', JSON.stringify(g, null, 2), 'utf-8');
             console.log('drawModule: Renderujem čvorove...');
-            return (0, drawModule_1.default)(g, flatModule, bit);
+            return (0, drawModule_1.default)(g, flatModule, bit,bit_in);
         })
             .catch(function (e) {
             console.error('Greška u elk.layout:', e);

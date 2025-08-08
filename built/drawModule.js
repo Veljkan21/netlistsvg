@@ -22,7 +22,7 @@ var WireDirection;
     WireDirection[WireDirection["Left"] = 2] = "Left";
     WireDirection[WireDirection["Right"] = 3] = "Right";
 })(WireDirection || (WireDirection = {}));
-function drawModule(g, module,bit =0) {
+function drawModule(g, module,bit =0, bit_in= 0) {
     console.log('🎨 drawModule: Renderujem čvorove...');
     var nodes = module.nodes.map(function (n) {
         var kchild = _.find(g.children, function (c) { return c.id === n.Key; });
@@ -37,11 +37,15 @@ function drawModule(g, module,bit =0) {
         var isBits = Array.isArray(bit)
         ? bit.some(b => new RegExp(`\\b${b}\\b`).test(netId))
         : new RegExp(`\\b${bit}\\b`).test(netId);
+        var isBits_in = Array.isArray(bit_in)
+        ? bit_in.some(b => new RegExp(`\\b${b}\\b`).test(netId))
+        : new RegExp(`\\b${bit_in}\\b`).test(netId);
 
-        console.log(bit);
+        //console.log(bit);
 
 
-        var lineStyle = "stroke: ".concat(isBits ? 'blue' : 'black', "; stroke-width: ").concat(numWires > 1 ? 2 : 1);
+        var lineStyle = "stroke: " + (isBits_in ? 'red' : (isBits ? 'blue' : 'black')) + "; stroke-width: " + (numWires > 1 ? 2 : 1);
+
         var netName = 'net_' + netId.slice(1, netId.length - 1) + ' width_' + numWires;
         //console.log(netName);
         return _.flatMap(e.sections, function (s) {

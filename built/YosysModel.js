@@ -16,14 +16,14 @@ var Yosys;
     function getInputPortPids(cell) {
         var keys = Object.keys(cell.port_directions || {});
         var inputs = keys.filter(function (k) { return cell.port_directions[k] === Direction.Input; });
-        console.log("\uD83D\uDFE6 Found ".concat(inputs.length, " input ports in cell of type \"").concat(cell.type, "\""));
+        //console.log("\uD83D\uDFE6 Found ".concat(inputs.length, " input ports in cell of type \"").concat(cell.type, "\""));
         return inputs;
     }
     Yosys.getInputPortPids = getInputPortPids;
     function getOutputPortPids(cell) {
         var keys = Object.keys(cell.port_directions || {});
         var outputs = keys.filter(function (k) { return cell.port_directions[k] === Direction.Output; });
-        console.log("\uD83D\uDFE9 Found ".concat(outputs.length, " output ports in cell of type \"").concat(cell.type, "\""));
+        //console.log("\uD83D\uDFE9 Found ".concat(outputs.length, " output ports in cell of type \"").concat(cell.type, "\""));
         return outputs;
     }
     Yosys.getOutputPortPids = getOutputPortPids;

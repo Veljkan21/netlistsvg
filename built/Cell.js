@@ -183,7 +183,7 @@ var Cell = /** @class */ (function () {
         var layoutAttrs = { 'org.eclipse.elk.portConstraints': 'FIXED_POS' };
         var fixedPosX = null;
         var fixedPosY = null;
-        console.log(fixedPosX);
+        //console.log(fixedPosX);
         for (var attr in this.attributes) {
             if (attr.startsWith('org.eclipse.elk')) {
                 if (attr === 'org.eclipse.elk.x') {
@@ -250,7 +250,7 @@ var Cell = /** @class */ (function () {
             labels: [],
         };
         if (fixedPosX) {
-            console.log("FINAL fixedPosX:", fixedPosX);
+            //console.log("FINAL fixedPosX:", fixedPosX);
             ret.x = fixedPosX;
         }
         if (fixedPosY) {
@@ -338,7 +338,12 @@ var Cell = /** @class */ (function () {
                 tempclone.push(portClone);
             });
             // first child of generic must be a text node.
-            tempclone[2][2] = this.key;
+            if (this.type.includes('$')) {
+                tempclone[2][2] = this.type;
+            } else {
+                tempclone[2][2] = this.key;
+            }
+
         }
         setClass(tempclone, '$cell_id', 'cell_' + this.key);
         return tempclone;
@@ -366,7 +371,6 @@ var Cell = /** @class */ (function () {
                     else {
                         return;
                     }
-                    console.log("oooo"+newString);
                     cell.labels.push({
                         id: _this.key + '.label.' + attrName,
                         text: newString,

@@ -5,14 +5,12 @@
   <s:properties>
    <s:layoutEngine
   elk.algorithm="layered"
-  org.eclipse.elk.direction="RIGHT"
+
   org.eclipse.elk.portConstraints="FIXED_SIDE"
   org.eclipse.elk.layered.layering.strategy="LONGEST_PATH"
-  org.eclipse.elk.layered.nodePlacement.strategy="SIMPLE"
-  org.eclipse.elk.layered.nodePlacement.bk.fixedAlignment="BALANCED"
   org.eclipse.elk.layered.crossingMinimization.semiInteractive="false"
   org.eclipse.elk.layered.mergeEdges="true"
-  org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers="30"
+  org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers="50"
   org.eclipse.elk.spacing.nodeNode="25"
   org.eclipse.elk.layered.nodePlacement.favorStraightEdges="true"
 />
@@ -209,8 +207,8 @@ line {
     <s:alias val="$not"/>
     <s:alias val="$logic_not"/>
 
-    <path d="M0,0 L0,20 L20,10 Z" class="$cell_id"/>
-    <circle cx="24" cy="10" r="3" class="$cell_id"/>
+    <path d="M0,0 L0,20 L20,10 Z" class="$cell_id" fill = "red"/>
+    <circle cx="24" cy="10" r="3" class="$cell_id" fill = "red"/>
 
     <g s:x="-1" s:y="10" s:pid="A"/>
     <g s:x="27" s:y="10" s:pid="Y"/>
@@ -274,7 +272,7 @@ line {
     <s:alias val="$eq"/>
     <s:alias val="$eqx"/>
 
-    <circle r="12.5" cx="12.5" cy="12.5" class="$cell_id"/>
+    <circle r="12.5" cx="12.5" cy="12.5" class="$cell_id" fill = "lightpink"/>
     <line x1="7.5" x2="17.5" y1="10" y2="10" class="$cell_id"/>
     <line x1="7.5" x2="17.5" y1="15" y2="15" class="$cell_id"/>
 
@@ -458,7 +456,7 @@ line {
   <g s:type="inputExt" transform="translate(50,250)" s:width="30" s:height="20">
     <text x="1" y="-4" class="nodelabel2 $cell_id" s:attribute="ref" text-anchor="start">input</text>
     <s:alias val="$_inputExt_"/>
-    <path d="M0,0 L0,20 L15,20 L30,10 L15,0 Z" class="$cell_id"/>
+    <path d="M0,0 L0,20 L15,20 L30,10 L15,0 Z" class="$cell_id" fill="blue"/>
     <g s:x="30" s:y="10" s:pid="Y"/>
   </g>
 
@@ -466,7 +464,7 @@ line {
     <text x="15" y="-4" class="nodelabel $cell_id" s:attribute="ref">constant</text>
 
     <s:alias val="$_constant_"/>
-    <rect width="30" height="20" class="$cell_id"/>
+    <rect width="30" height="20" class="$cell_id" fill = "purple"/>
 
     <g s:x="31" s:y="10" s:pid="Y"/>
   </g>
@@ -474,7 +472,7 @@ line {
   <g s:type="outputExt" transform="translate(250,250)" s:width="30" s:height="20">
     <text x="15" y="-4" class="nodelabel $cell_id" s:attribute="ref">output</text>
     <s:alias val="$_outputExt_"/>
-    <path d="M30,0 L30,20 L15,20 L0,10 L15,0 Z" class="$cell_id"/>
+    <path d="M30,0 L30,20 L15,20 L0,10 L15,0 Z" class="$cell_id" fill = "green"/>
 
     <g s:x="0" s:y="10" s:pid="A"/>
   </g>
@@ -543,7 +541,7 @@ line {
     <s:alias val="$_DFF_-bus"/>
     <s:alias val="$_DFF_P_-bus"/>
 
-    <rect width="30" height="40" x="0" y="0" class="$cell_id"/>
+    <rect width="30" height="40" x="0" y="0" class="$cell_id" />
     <path d="M0,35 L5,30 L0,25" class="$cell_id"/>
     <path d="M30,2 L32,2 L32,42 L2,42 L2,40" class="$cell_id"/>
     <path d="M32,4 L34,4 L34,44 L4,44 L4,42" class="$cell_id"/>
@@ -608,7 +606,7 @@ line {
     <s:alias val="adlatch-bus"/>
     <s:alias val="$adlatch-bus"/>
 
-    <rect width="30" height="40" x="0" y="0" class="$cell_id"/>
+    <rect width="30" height="40" x="0" y="0" class="$cell_id" />
 
     <path d="M 1,35 H 4 V 25 h 5 v 10 h 3" class="$cell_id"/>
     <path d="M30,2 L32,2 L32,42 L2,42 L2,40" class="$cell_id"/>
@@ -709,7 +707,7 @@ line {
   <g s:type="_OAI4_" transform="translate(350, 400)" s:width="66" s:height="40">
     <s:alias val="$_OAI4_"/>
 
-    <path d="M30,13 L30,38 L45,38 A15 12.5 0 0 0 45,13 Z" class="$cell_id"/>
+    <path d="M30,13 L30,38 L45,38 A15 12.5 0 0 0 45,13 Z" class="$cell_id" />
     <path d="M0,0 A30 25 0 0 1 0,25 A30 25 0 0 0 30,12.5 A30 25 0 0 0 0,0" class="$cell_id"/>
     <path d="M0,25 A30 25 0 0 1 0,50 A30 25 0 0 0 30,37.5 A30 25 0 0 0 0,25" class="$cell_id"/>
     <circle cx="63" cy="25.5" r="3" class="$cell_id"/>
@@ -729,7 +727,7 @@ line {
   <g s:type="generic" transform="translate(550,250)" s:width="30" s:height="40">
 
     <text x="15" y="-4" class="nodelabel $cell_id" s:attribute="ref">generic</text>
-    <rect width="30" height="40" s:generic="body" class="$cell_id"/>
+    <rect width="30" height="40" s:generic="body" class="$cell_id" fill = "orange"/>
 
     <g transform="translate(30, 10)" s:x="30" s:y="10" s:pid="out0">
       <text x="5" y="-4" style="fill:#000; stroke:none" class="$cell_id">out0</text>

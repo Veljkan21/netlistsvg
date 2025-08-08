@@ -14,23 +14,28 @@ require('ajv-errors')(ajv);
 if (require.main === module) {
     var argv = yargs
     .demand(1)
-    .usage('usage: $0 input_json_file [-o output_svg_file] [--skin skin_file] [--layout elk_json_file] [--bit ]')
+    .usage('usage: $0 input_json_file [-o output_svg_file] [--skin skin_file] [--layout elk_json_file] [--bit ] [--bit_in]')
     .option('bit', {
         describe: 'Enable some bit-specific feature',
         type: 'array', // ili 'number', ako očekuješ 0/1
         number: true
     })
+    .option('bit_in', {
+        describe: 'Enable some bit_in-specific feature',
+        type: 'array', // ili 'number', ako očekuješ 0/1
+        number: true
+    })
     .argv;
-    main(argv._[0], argv.o, argv.skin, argv.layout, argv.bit);
+    main(argv._[0], argv.o, argv.skin, argv.layout, argv.bit, argv.bit_in);
 }
 
-function render(skinData, netlist, outputPath, elkData, bit) {
+function render(skinData, netlist, outputPath, elkData, bit, bit_in) {
     lib.render(skinData, netlist, (err, svgData) => {
         if (err) throw err;
         fs.writeFile(outputPath, svgData, 'utf-8', (err) => {
             if (err) throw err;
         });
-    }, elkData, bit);
+    }, elkData, bit, bit_in);
 }
 
 function parseFiles(skinPath, netlistPath, elkJsonPath, callback) {
@@ -49,9 +54,12 @@ function parseFiles(skinPath, netlistPath, elkJsonPath, callback) {
     });
 }
 
-function main(netlistPath, outputPath, skinPath, elkJsonPath, bit) {
+function main(netlistPath, outputPath, skinPath, elkJsonPath, bit, bit_in) {
     if (!Array.isArray(bit)) {
         bit = typeof bit === 'undefined' ? [] : [bit];
+    }
+    if (!Array.isArray(bit_in)) {
+        bit_in = typeof bit_in === 'undefined' ? [] : [bit_in];
     }
     skinPath = skinPath || path.join(__dirname, '../lib/default.svg');
     outputPath = outputPath || 'out.svg';
@@ -62,7 +70,7 @@ function main(netlistPath, outputPath, skinPath, elkJsonPath, bit) {
         if (!valid) {
             throw Error(JSON.stringify(ajv.errors, null, 2));
         }
-        render(skinData, netlistJson, outputPath, elkData, bit);
+        render(skinData, netlistJson, outputPath, elkData, bit, bit_in);
     });
 }
 

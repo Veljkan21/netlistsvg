@@ -21,17 +21,17 @@ var ElkModel;
     ElkModel.edgeIndex = 0;
 })(ElkModel || (exports.ElkModel = ElkModel = {}));
 function buildElkGraph(module) {
-    console.log("\uD83E\uDDF1 buildElkGraph: Startujem za modul \"".concat(module.moduleName, "\""));
-    console.log("\uD83D\uDCE6 buildElkGraph: Ukupno \u010Dvorova: ".concat(module.nodes.length));
+    //console.log("\uD83E\uDDF1 buildElkGraph: Startujem za modul \"".concat(module.moduleName, "\""));
+    //console.log("\uD83D\uDCE6 buildElkGraph: Ukupno \u010Dvorova: ".concat(module.nodes.length));
     var children = module.nodes.map(function (n) {
         return n.buildElkChild();
     });
     ElkModel.edgeIndex = 0;
     ElkModel.dummyNum = 0;
-    console.log("\uD83D\uDD17 buildElkGraph: Po\u010Dinjem obradu \u017Eica... (".concat(module.wires.length, " ukupno)"));
+    //console.log("\uD83D\uDD17 buildElkGraph: Po\u010Dinjem obradu \u017Eica... (".concat(module.wires.length, " ukupno)"));
     var edges = _.flatMap(module.wires, function (w, i) {
         if (i % 1000 === 0) {
-            console.log("  \uD83E\uDDEE Obrada \u017Eice #".concat(i, " (").concat(w.netName, ")"));
+            //console.log("  \uD83E\uDDEE Obrada \u017Eice #".concat(i, " (").concat(w.netName, ")"));
         }
         var numWires = w.netName.split(',').length - 2;
         if (w.drivers.length > 0 && w.riders.length > 0 && w.laterals.length === 0) {
@@ -98,7 +98,7 @@ function buildElkGraph(module) {
         }
         return [];
     });
-    console.log("\u2705 buildElkGraph: Gotovo. \u010Cvorova: ".concat(children.length, ", Veza: ").concat(edges.length));
+    //console.log("\u2705 buildElkGraph: Gotovo. \u010Cvorova: ".concat(children.length, ", Veza: ").concat(edges.length));
     return {
         id: module.moduleName,
         children: children,

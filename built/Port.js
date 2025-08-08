@@ -29,7 +29,7 @@ var Port = /** @class */ (function () {
         var constNameCollector = '';
         var constNumCollector = [];
         var portSigs = this.value;
-        console.log("\uD83D\uDD0D [Port: ".concat(this.key, "] Tra\u017Eim konstante me\u0111u signalima: ").concat(portSigs));
+        //console.log("\uD83D\uDD0D [Port: ".concat(this.key, "] Tra\u017Eim konstante me\u0111u signalima: ").concat(portSigs));
         portSigs.forEach(function (portSig, portSigIndex) {
             if (portSig === '0' || portSig === '1') {
                 maxNum += 1;
@@ -51,7 +51,7 @@ var Port = /** @class */ (function () {
     Port.prototype.getGenericElkPort = function (index, templatePorts, dir) {
         var nkey = this.parentNode.Key;
         var type = this.parentNode.getTemplate()[1]['s:type'];
-        console.log("\uD83D\uDCCC [Port: ".concat(this.key, "] Elk port generisan (").concat(dir, "), index: ").concat(index, ", tip: ").concat(type));
+        //console.log("\uD83D\uDCCC [Port: ".concat(this.key, "] Elk port generisan (").concat(dir, "), index: ").concat(index, ", tip: ").concat(type));
         if (index === 0) {
             var ret = {
                 id: nkey + '.' + this.key,
@@ -108,7 +108,7 @@ var Port = /** @class */ (function () {
         var _this = this;
         var constName = nameCollector.split('').reverse().join('');
         if (signalsByConstantName.hasOwnProperty(constName)) {
-            console.log("\uD83D\uDD01 [Port: ".concat(this.key, "] Ve\u0107 vi\u0111en literal \"").concat(constName, "\", koristi stare signale."));
+            //console.log("\uD83D\uDD01 [Port: ".concat(this.key, "] Ve\u0107 vi\u0111en literal \"").concat(constName, "\", koristi stare signale."));
             var constSigs = signalsByConstantName[constName];
             var constLength_1 = constSigs.length;
             constSigs.forEach(function (constSig, constIndex) {
@@ -117,7 +117,7 @@ var Port = /** @class */ (function () {
             });
         }
         else {
-            console.log("\uD83E\uDDEE [Port: ".concat(this.key, "] Novi literal \"").concat(constName, "\" dodeljen signalima: [").concat(constants, "]"));
+            //console.log("\uD83E\uDDEE [Port: ".concat(this.key, "] Novi literal \"").concat(constName, "\" dodeljen signalima: [").concat(constants, "]"));
             constantCollector.push(Cell_1.default.fromConstantInfo(constName, constants));
             signalsByConstantName[constName] = constants;
         }

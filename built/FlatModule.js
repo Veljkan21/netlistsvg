@@ -19,7 +19,7 @@ var _ = require("lodash");
 var FlatModule = /** @class */ (function () {
     function FlatModule(netlist) {
         var _this = this;
-        console.log("🧩 [FlatModule] Konstruktor: traženje top modula...");
+        //console.log(" [FlatModule] Konstruktor: traženje top modula...");
         this.moduleName = null;
         _.forEach(netlist.modules, function (mod, name) {
             if (mod.attributes && Number(mod.attributes.top) === 1) {
@@ -38,7 +38,7 @@ var FlatModule = /** @class */ (function () {
         this.wires = [];
     }
     FlatModule.prototype.addConstants = function () {
-        console.log("➕ [FlatModule] Dodavanje konstantnih čvorova...");
+        //console.log("[FlatModule] Dodavanje konstantnih čvorova...");
         var maxNum = this.nodes.reduce((function (acc, v) { return v.maxOutVal(acc); }), -1);
         var signalsByConstantName = {};
         var cells = [];
@@ -49,7 +49,7 @@ var FlatModule = /** @class */ (function () {
         //console.log("\uD83D\uDD22 [FlatModule] Dodato konstanti: ".concat(cells.length));
     };
     FlatModule.prototype.addSplitsJoins = function () {
-        console.log("🔀 [FlatModule] Dodavanje splits/joins...");
+        //console.log("[FlatModule] Dodavanje splits/joins...");
         var allInputs = _.flatMap(this.nodes, function (n) { return n.inputPortVals(); });
         var allOutputs = _.flatMap(this.nodes, function (n) { return n.outputPortVals(); });
         var allInputsCopy = allInputs.slice();
@@ -68,7 +68,7 @@ var FlatModule = /** @class */ (function () {
         //console.log("\uD83D\uDD17 [FlatModule] Splits: ".concat(Object.keys(splits).length, ", Joins: ").concat(Object.keys(joins).length));
     };
     FlatModule.prototype.createWires = function () {
-        console.log("📡 [FlatModule] Kreiranje žica...");
+       // console.log(" [FlatModule] Kreiranje žica...");
         var layoutProps = Skin_1.default.getProperties();
         var ridersByNet = {};
         var driversByNet = {};

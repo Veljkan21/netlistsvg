@@ -14,7 +14,7 @@ var elk = new ELK();
 function findBitsInNetnames(yosysNetlist, name) {
     if (!yosysNetlist || !yosysNetlist.netnames || !name) return [];
 
-    console.log("🔑 Ključevi u netnames:", Object.keys(yosysNetlist.netnames));
+    //console.log("Ključevi u netnames:", Object.keys(yosysNetlist.netnames));
 
     const entry = yosysNetlist.netnames[name];
     if (entry && Array.isArray(entry.bits))
@@ -93,10 +93,10 @@ function render(skinData, yosysNetlist, done, elkData, bit, bit_in) {
         promise = elk.layout(kgraph, { layoutOptions: layoutProps.layoutEngine })
             .then(function (g) {
             var t1 = Date.now();
-            console.log("elk.layout zavr\u0161en za ".concat((t1 - t0_1) / 1000, "s"));
+            console.log("elk.layout zavrsen za ".concat((t1 - t0_1) / 1000, "s"));
             // ✅ Sačuvaj izlazni graf
            // fs.writeFileSync('elk-output-layout.json', JSON.stringify(g, null, 2), 'utf-8');
-            console.log('drawModule: Renderujem čvorove...');
+            //console.log('drawModule: Renderujem čvorove...');
             return (0, drawModule_1.default)(g, flatModule, bit,bit_in);
         })
             .catch(function (e) {

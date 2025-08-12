@@ -23,14 +23,14 @@ var WireDirection;
     WireDirection[WireDirection["Right"] = 3] = "Right";
 })(WireDirection || (WireDirection = {}));
 function drawModule(g, module,bit =0, bit_in= 0) {
-    console.log('🎨 drawModule: Renderujem čvorove...');
+   // console.log(' drawModule: Renderujem čvorove...');
     var nodes = module.nodes.map(function (n) {
         var kchild = _.find(g.children, function (c) { return c.id === n.Key; });
         return n.render(kchild);
     });
-    console.log('🧹 drawModule: Uklanjam dummy ivice...');
+    //console.log('drawModule: Uklanjam dummy ivice...');
     removeDummyEdges(g);
-    console.log('🔌 drawModule: Renderujem žice...');
+  //  console.log('drawModule: Renderujem žice...');
     var lines = _.flatMap(g.edges, function (e) {
         var netId = elkGraph_1.ElkModel.wireNameLookup[e.id];
         var numWires = netId.split(',').length - 2;
@@ -86,7 +86,7 @@ function drawModule(g, module,bit =0, bit_in= 0) {
             return bends.concat(line);
         });
     });
-    console.log('🏷️ drawModule: Dodajem label-e...');
+    //console.log('drawModule: Dodajem label-e...');
     var labels = [];
     for (var index in g.edges) {
         if (g.edges.hasOwnProperty(index)) {
@@ -125,7 +125,7 @@ function drawModule(g, module,bit =0, bit_in= 0) {
     if (labels.length > 0) {
         lines = lines.concat(labels);
     }
-    console.log('🧩 drawModule: Finalizujem SVG...');
+    //console.log('drawModule: Finalizujem SVG...');
     var svgAttrs = Skin_1.default.skin[1];
     svgAttrs.width = g.width.toString();
     svgAttrs.height = g.height.toString();
@@ -139,7 +139,7 @@ function drawModule(g, module,bit =0, bit_in= 0) {
     });
     var elements = __spreadArray(__spreadArray([styles], nodes, true), lines, true);
     var ret = __spreadArray(['svg', svgAttrs], elements, true);
-    console.log('✅ drawModule: SVG render završen.');
+    //console.log('drawModule: SVG render završen.');
     return onml.s(ret);
 }
 function which_dir(start, end) {

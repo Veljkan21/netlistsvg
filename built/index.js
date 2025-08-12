@@ -95,7 +95,7 @@ function render(skinData, yosysNetlist, done, elkData, bit, bit_in) {
             var t1 = Date.now();
             console.log("elk.layout zavr\u0161en za ".concat((t1 - t0_1) / 1000, "s"));
             // ✅ Sačuvaj izlazni graf
-            fs.writeFileSync('elk-output-layout.json', JSON.stringify(g, null, 2), 'utf-8');
+           // fs.writeFileSync('elk-output-layout.json', JSON.stringify(g, null, 2), 'utf-8');
             console.log('drawModule: Renderujem čvorove...');
             return (0, drawModule_1.default)(g, flatModule, bit,bit_in);
         })

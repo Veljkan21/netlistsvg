@@ -339,7 +339,7 @@ var Cell = /** @class */ (function () {
             });
             // first child of generic must be a text node.
             if (this.type.includes('$')) {
-                tempclone[2][2] = this.type;
+                tempclone[2][2] = String(this.type).replace(/^\$/, '');
             } else {
                 tempclone[2][2] = this.key;
             }
